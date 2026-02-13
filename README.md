@@ -252,16 +252,6 @@ RULES_TABLE=compliance_rules-dev
 BEDROCK_MODEL_ID=anthropic.claude-3-5-sonnet-20241022-v2:0
 ```
 
----
-
-## 📖 Documentation
-
-### Required Files (per Hackathon Guidelines)
-
-1. **requirements.md**: Complete functional and non-functional requirements
-2. **design.md**: Detailed architecture, AWS services, data flow, error handling
-3. **Presentation (PPTX)**: Pitch deck with problem, solution, features, architecture, costs
-
 ### Additional Documentation
 
 - [API Reference](docs/api.md)
@@ -341,41 +331,10 @@ artillery run tests/load/concurrent-upload.yml
    - Submission accepted on first review
 ```
 
----
-
-## 🌟 Impact & Future Roadmap
-
-### Expected Impact (Year 1)
-
-- 🏥 **50+ Research Centers**: Onboard major hospitals and institutions
-- 📊 **1,000+ Protocols**: Process clinical trial documents
-- 💰 **₹5 Crore+ Savings**: Aggregate cost savings for healthcare sector
-- ⏱️ **50,000+ Hours**: Researcher time freed up for actual research
-
-### Future Enhancements
-
-#### Phase 2 (Q2 2026)
-- 🌐 **Multi-Language Support**: Hindi, Tamil, Bengali, Telugu, Marathi
-- 📱 **Mobile App**: iOS and Android for field coordinators
-- 🤝 **Hospital Integration**: Connect with EMR systems
-
-#### Phase 3 (Q3-Q4 2026)
-- ✍️ **AI Protocol Writer**: Generate protocol drafts from templates
-- 👥 **Collaboration Tools**: Real-time commenting and version control
-- 📈 **Analytics Dashboard**: Aggregate compliance trends across institution
-- 🔗 **Blockchain Audit**: Enhanced trust with immutable blockchain records
-
-#### Phase 4 (2027+)
-- 🌍 **International Expansion**: FDA, EMA regulations
-- 🧠 **ML Improvements**: Custom model fine-tuning on institutional data
-- 🔬 **Research Insights**: Analyze compliance patterns for policy recommendations
-
----
-
 ## 👥 Team
 
-**Team Name**: [Your Team Name]  
-**Team Leader**: [Your Name]
+**Team Name**: [ProVeritas-Protocol-Compliance-AI]  
+**Team Leader**: [Dhanvantari Jadhav]
 
 ### Roles
 - **AI/ML Engineer**: AWS Bedrock, Comprehend Medical integration
@@ -399,24 +358,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - **CDSCO**: For regulatory clarity and transparency
 - **Indian Clinical Research Community**: For valuable feedback and insights
 
----
 
-## 📞 Contact
-
-- **Email**: [your-email@example.com]
-- **GitHub**: [@your-team](https://github.com/your-team/protocolscout)
-- **LinkedIn**: [Your LinkedIn]
-- **Website**: [protocolscout.ai](https://protocolscout.ai) (coming soon)
-
----
-
-## 🔗 Quick Links
-
-- 📋 [Requirements Document](requirements.md)
-- 🏗️ [Design Document](design.md)
-- 📊 [Presentation (PPTX)](ProtocolScout_Presentation.pptx)
-- 📚 [API Documentation](docs/api.md)
-- 🚀 [Deployment Guide](docs/deployment.md)
 
 ---
 
