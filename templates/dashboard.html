@@ -1,0 +1,257 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - ProtocolScout{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row">
+        <div class="col-lg-12">
+            <!-- Header -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h2 class="mb-3">
+                        <i class="fas fa-chart-line text-primary me-2"></i>My Protocols Dashboard
+                    </h2>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label for="userIdInput" class="form-label">Enter your User ID / Email:</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="userIdInput" 
+                                       placeholder="your.email@example.com" value="{{ user_id }}">
+                                <button class="btn btn-primary" id="loadProtocolsBtn">
+                                    <i class="fas fa-search me-2"></i>Load Protocols
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Loading State -->
+            <div id="loadingSection" class="text-center py-5 d-none">
+                <div class="spinner-border text-primary spinner-border-custom mb-3" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <h5>Loading your protocols...</h5>
+            </div>
+            
+            <!-- Protocols List -->
+            <div id="protocolsSection" class="d-none">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title mb-4">
+                            <i class="fas fa-folder-open me-2"></i>Your Protocols
+                            <span class="badge bg-primary" id="protocolCount">0</span>
+                        </h5>
+                        <div id="protocolsList"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Empty State -->
+            <div id="emptySection" class="d-none">
+                <div class="card">
+                    <div class="card-body text-center py-5">
+                        <i class="fas fa-inbox fa-4x text-muted mb-3"></i>
+                        <h5>No Protocols Found</h5>
+                        <p class="text-muted mb-4">You haven't uploaded any protocols yet.</p>
+                        <a href="/upload" class="btn btn-primary">
+                            <i class="fas fa-upload me-2"></i>Upload Your First Protocol
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Error Section -->
+            <div id="errorSection" class="d-none">
+                <div class="alert alert-danger">
+                    <h5 class="alert-heading">
+                        <i class="fas fa-exclamation-triangle me-2"></i>Error Loading Protocols
+                    </h5>
+                    <p id="errorMessage"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Load protocols on button click
+    $('#loadProtocolsBtn').on('click', function() {
+        const userId = $('#userIdInput').val().trim();
+        if (!userId) {
+            alert('Please enter your User ID or Email');
+            return;
+        }
+        loadProtocols(userId);
+    });
+    
+    // Load on enter key
+    $('#userIdInput').on('keypress', function(e) {
+        if (e.which === 13) {
+            $('#loadProtocolsBtn').click();
+        }
+    });
+    
+    // Auto-load if user_id is present
+    const initialUserId = $('#userIdInput').val();
+    if (initialUserId && initialUserId !== 'anonymous') {
+        loadProtocols(initialUserId);
+    }
+    
+    function loadProtocols(userId) {
+        // Hide all sections
+        $('#loadingSection').removeClass('d-none');
+        $('#protocolsSection').addClass('d-none');
+        $('#emptySection').addClass('d-none');
+        $('#errorSection').addClass('d-none');
+        
+        $.ajax({
+            url: '/api/protocols/' + encodeURIComponent(userId),
+            type: 'GET',
+            success: function(data) {
+                $('#loadingSection').addClass('d-none');
+                
+                if (data.protocols.length === 0) {
+                    $('#emptySection').removeClass('d-none');
+                } else {
+                    $('#protocolsSection').removeClass('d-none');
+                    $('#protocolCount').text(data.count);
+                    renderProtocols(data.protocols);
+                }
+            },
+            error: function(xhr) {
+                $('#loadingSection').addClass('d-none');
+                $('#errorSection').removeClass('d-none');
+                
+                const error = xhr.responseJSON ? xhr.responseJSON.error : 'Failed to load protocols';
+                $('#errorMessage').text(error);
+            }
+        });
+    }
+    
+    function renderProtocols(protocols) {
+        let html = '<div class="table-responsive"><table class="table table-hover">';
+        html += `
+            <thead>
+                <tr>
+                    <th>Protocol ID</th>
+                    <th>Upload Date</th>
+                    <th>Status</th>
+                    <th>File Size</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+        `;
+        
+        protocols.forEach(p => {
+            // Format date in Indian Standard Time
+            // The timestamp field contains Unix timestamp in seconds
+            let formattedDate = 'N/A';
+            try {
+                // Check if timestamp exists (could be 'timestamp' or 'created_at')
+                const timestamp = p.timestamp || p.created_at;
+                if (timestamp) {
+                    // Convert Unix timestamp (seconds) to milliseconds for JavaScript Date
+                    const date = new Date(timestamp * 1000);
+                    // Check if date is valid
+                    if (!isNaN(date.getTime())) {
+                        const options = {
+                            year: 'numeric',
+                            month: '2-digit',
+                            day: '2-digit',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            hour12: true,
+                            timeZone: 'Asia/Kolkata'
+                        };
+                        formattedDate = date.toLocaleString('en-IN', options);
+                    }
+                }
+            } catch (e) {
+                console.error('Date parsing error:', e, p.timestamp || p.created_at);
+            }
+            
+            const size = (p.file_size_bytes / (1024 * 1024)).toFixed(2) + ' MB';
+            const statusBadge = getStatusBadge(p.status);
+            
+            html += `
+                <tr>
+                    <td><code>${p.protocol_id}</code></td>
+                    <td>${formattedDate}</td>
+                    <td>${statusBadge}</td>
+                    <td>${size}</td>
+                    <td>
+                        <a href="/results/${p.protocol_id}" class="btn btn-sm btn-primary">
+                            <i class="fas fa-eye me-1"></i>View
+                        </a>
+                    </td>
+                </tr>
+            `;
+        });
+        
+        html += '</tbody></table></div>';
+        $('#protocolsList').html(html);
+    }
+    
+    function getStatusBadge(status) {
+        const badges = {
+            'processing': '<span class="badge bg-warning"><i class="fas fa-spinner fa-spin me-1"></i>Processing</span>',
+            'completed': '<span class="badge bg-success"><i class="fas fa-check me-1"></i>Completed</span>',
+            'failed': '<span class="badge bg-danger"><i class="fas fa-times me-1"></i>Failed</span>',
+            'uploaded': '<span class="badge bg-info"><i class="fas fa-upload me-1"></i>Uploaded</span>'
+        };
+        return badges[status] || '<span class="badge bg-secondary">Unknown</span>';
+    }
+    
+    function downloadReport(format) {
+        const protocolId = '{{ protocol_id }}';
+        const btn = event.target.closest('button');
+        const originalText = btn.innerHTML;
+        
+        // Show loading
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Downloading...';
+        
+        // Try to download
+        fetch(`/download/${protocolId}/${format}`)
+            .then(response => {
+                if (response.ok) {
+                    return response.blob();
+                } else {
+                    return response.json().then(data => {
+                        throw new Error(data.message || 'Download failed');
+                    });
+                }
+            })
+            .then(blob => {
+                // Create download link
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `compliance_report_${protocolId}.${format}`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+                
+                // Reset button
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            })
+            .catch(error => {
+                // Show error
+                alert(error.message || 'Report not ready yet. Please try again in a few moments.');
+                
+                // Reset button
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            });
+    }
+});
+</script>
+{% endblock %}

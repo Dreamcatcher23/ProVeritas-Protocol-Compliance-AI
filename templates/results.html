@@ -1,0 +1,553 @@
+{% extends "base.html" %}
+
+{% block title %}Compliance Analysis Report - ProtocolScout{% endblock %}
+
+{% block extra_css %}
+<style>
+    .executive-summary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 15px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+    
+    .score-circle {
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        background: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+    }
+    
+    .score-number {
+        font-size: 3rem;
+        font-weight: bold;
+        line-height: 1;
+    }
+    
+    .score-label {
+        font-size: 0.9rem;
+        color: #666;
+        margin-top: 0.5rem;
+    }
+    
+    .violation-card {
+        transition: all 0.3s;
+        margin-bottom: 1.5rem;
+    }
+    
+    .violation-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    }
+    
+    .section-header {
+        background: #f8f9fa;
+        padding: 1rem 1.5rem;
+        border-left: 4px solid #2563eb;
+        margin-bottom: 1.5rem;
+        border-radius: 8px;
+    }
+    
+    .action-box {
+        background: #f0fdf4;
+        border: 2px solid #10b981;
+        border-radius: 10px;
+        padding: 1.5rem;
+        margin-top: 1rem;
+    }
+    
+    .priority-badge {
+        font-size: 0.75rem;
+        padding: 0.4rem 0.8rem;
+        border-radius: 20px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .regulation-tag {
+        display: inline-block;
+        background: #e0e7ff;
+        color: #3730a3;
+        padding: 0.25rem 0.75rem;
+        border-radius: 15px;
+        font-size: 0.85rem;
+        margin-right: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <!-- Loading State -->
+    <div id="loadingSection" class="text-center py-5">
+        <div class="spinner-border text-primary spinner-border-custom mb-3" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+        <h5>Analyzing your protocol compliance...</h5>
+        <p class="text-muted">Please wait while we prepare your detailed report</p>
+    </div>
+    
+    <!-- Results Section -->
+    <div id="resultsSection" class="d-none">
+        <!-- Executive Summary -->
+        <div class="executive-summary">
+            <div class="row align-items-center">
+                <div class="col-md-3 text-center">
+                    <div class="score-circle mx-auto">
+                        <div class="score-number" id="complianceScore">--</div>
+                        <div class="score-label">Compliance Score</div>
+                    </div>
+                </div>
+                <div class="col-md-9">
+                    <h2 class="mb-3">Protocol Compliance Analysis Report</h2>
+                    <p class="mb-2"><strong>Protocol ID:</strong> <span style="font-family: monospace;">{{ protocol_id }}</span></p>
+                    <p class="mb-2" id="analysisDate"><strong>Analysis Date:</strong> <span id="dateValue"></span></p>
+                    <p class="mb-0" id="overallStatus"></p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Quick Stats -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card text-center h-100">
+                    <div class="card-body">
+                        <i class="fas fa-clipboard-check fa-2x text-primary mb-2"></i>
+                        <h3 class="fw-bold text-primary" id="rulesChecked">--</h3>
+                        <p class="text-muted mb-0 small">Regulatory Rules Evaluated</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center h-100">
+                    <div class="card-body">
+                        <i class="fas fa-exclamation-circle fa-2x text-danger mb-2"></i>
+                        <h3 class="fw-bold text-danger" id="criticalCount">0</h3>
+                        <p class="text-muted mb-0 small">Critical Issues</p>
+                        <small class="text-danger">Must Fix Immediately</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center h-100">
+                    <div class="card-body">
+                        <i class="fas fa-exclamation-triangle fa-2x text-warning mb-2"></i>
+                        <h3 class="fw-bold text-warning" id="highCount">0</h3>
+                        <p class="text-muted mb-0 small">High Priority Issues</p>
+                        <small class="text-warning">Fix Before Submission</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center h-100">
+                    <div class="card-body">
+                        <i class="fas fa-info-circle fa-2x text-info mb-2"></i>
+                        <h3 class="fw-bold text-info" id="otherCount">0</h3>
+                        <p class="text-muted mb-0 small">Other Issues</p>
+                        <small class="text-muted">Recommended Fixes</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Regulatory Compliance Summary -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title mb-4">
+                    <i class="fas fa-balance-scale me-2 text-primary"></i>Regulatory Compliance Summary
+                </h5>
+                <div id="complianceSummary"></div>
+            </div>
+        </div>
+        
+        <!-- Critical Issues (if any) -->
+        <div id="criticalSection" class="d-none mb-4">
+            <div class="section-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-exclamation-circle text-danger me-2"></i>
+                    Critical Issues - Immediate Action Required
+                </h5>
+            </div>
+            <div id="criticalList"></div>
+        </div>
+        
+        <!-- High Priority Issues (if any) -->
+        <div id="highSection" class="d-none mb-4">
+            <div class="section-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                    High Priority Issues - Fix Before Submission
+                </h5>
+            </div>
+            <div id="highList"></div>
+        </div>
+        
+        <!-- Other Issues (if any) -->
+        <div id="otherSection" class="d-none mb-4">
+            <div class="section-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-info-circle text-info me-2"></i>
+                    Additional Recommendations
+                </h5>
+            </div>
+            <div id="otherList"></div>
+        </div>
+        
+        <!-- No Issues Found -->
+        <div id="noIssuesSection" class="d-none mb-4">
+            <div class="card border-success">
+                <div class="card-body text-center py-5">
+                    <i class="fas fa-check-circle fa-4x text-success mb-3"></i>
+                    <h4 class="text-success">Excellent! Your Protocol is Compliant</h4>
+                    <p class="text-muted">No compliance issues were found. Your protocol meets all regulatory requirements.</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Download Reports -->
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title mb-4">
+                    <i class="fas fa-download me-2"></i>Download Detailed Reports
+                </h5>
+                <p class="text-muted mb-3">Download the complete compliance analysis report for your records and submission.</p>
+                <div class="row">
+                    <div class="col-md-4">
+                        <button class="btn btn-danger w-100 mb-2" onclick="downloadReport('pdf')">
+                            <i class="fas fa-file-pdf me-2"></i>Download PDF Report
+                            <br><small>Professional format for submission</small>
+                        </button>
+                    </div>
+                    <div class="col-md-4">
+                        <button class="btn btn-success w-100 mb-2" onclick="downloadReport('json')">
+                            <i class="fas fa-file-code me-2"></i>Download JSON Report
+                            <br><small>Structured data format for systems</small>
+                        </button>
+                    </div>
+                    <div class="col-md-4">
+                        <button class="btn btn-primary w-100 mb-2" onclick="downloadReport('txt')">
+                            <i class="fas fa-file-alt me-2"></i>Download Text Report
+                            <br><small>Human-readable format for review</small>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Error Section -->
+    <div id="errorSection" class="d-none">
+        <div class="alert alert-warning">
+            <h5 class="alert-heading">
+                <i class="fas fa-clock me-2"></i>Analysis In Progress
+            </h5>
+            <p id="errorMessage">Your protocol is currently being analyzed. This typically takes 3-5 minutes.</p>
+            <button class="btn btn-warning" onclick="location.reload()">
+                <i class="fas fa-sync me-2"></i>Check Status
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Global download function
+function downloadReport(format) {
+    const protocolId = '{{ protocol_id }}';
+    const btn = event.target.closest('button');
+    const originalText = btn.innerHTML;
+    
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Downloading...';
+    
+    fetch(`/download/${protocolId}/${format}`)
+        .then(response => {
+            if (response.ok) return response.blob();
+            return response.json().then(data => {
+                throw new Error(data.message || 'Download failed');
+            });
+        })
+        .then(blob => {
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `compliance_report_${protocolId}.${format}`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+        })
+        .catch(error => {
+            alert(error.message || 'Report not ready yet. Please try again in a few moments.');
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+        });
+}
+
+$(document).ready(function() {
+    const protocolId = '{{ protocol_id }}';
+    
+    // Helper functions for clinical-friendly language
+    function getCategoryName(category) {
+        const map = {
+            'informed_consent': 'Patient Consent & Information',
+            'investigator': 'Investigator Responsibilities',
+            'protocol_deviation': 'Protocol Compliance & Deviations',
+            'data_privacy': 'Data Protection & Patient Privacy',
+            'safety_reporting': 'Safety Reporting & Adverse Events',
+            'ethics_committee': 'Ethics Committee Requirements',
+            'sponsor': 'Sponsor Responsibilities',
+            'monitoring': 'Study Monitoring & Oversight',
+            'documentation': 'Documentation & Record Keeping'
+        };
+        return map[category] || category.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+    }
+    
+    function getRegulationName(text) {
+        const regulations = [];
+        if (text.includes('ICH E6')) regulations.push('ICH-GCP');
+        if (text.includes('ICMR')) regulations.push('ICMR Guidelines');
+        if (text.includes('NDCT')) regulations.push('Indian CT Rules');
+        if (text.includes('DPDP')) regulations.push('Data Privacy Act');
+        if (text.includes('CDSCO')) regulations.push('CDSCO');
+        return regulations;
+    }
+    
+    function simplifyText(text) {
+        if (!text) return '';
+        
+        // Remove technical IDs
+        text = text.replace(/\b[A-Z0-9]{10,}_[A-Z_]+_\d+\b/g, '');
+        
+        // Make more readable
+        const replacements = {
+            'ICH E6\\(R2\\)': 'International Good Clinical Practice Guidelines',
+            'ICMR 2017': 'Indian Council of Medical Research Guidelines',
+            'NDCT 2019': 'New Drugs and Clinical Trials Rules',
+            'DPDP Act 2023': 'Digital Personal Data Protection Act',
+            'GCP': 'Good Clinical Practice',
+            'EC': 'Ethics Committee',
+            'SAE': 'Serious Adverse Event',
+            'AE': 'Adverse Event',
+            'informed consent': 'patient consent'
+        };
+        
+        for (const [key, value] of Object.entries(replacements)) {
+            const regex = new RegExp(key, 'gi');
+            text = text.replace(regex, value);
+        }
+        
+        return text.trim();
+    }
+    
+    function getActionableRecommendation(recommendation, category) {
+        // Make recommendations more actionable
+        let action = simplifyText(recommendation);
+        
+        // Add specific guidance based on category
+        const guidance = {
+            'informed_consent': 'Add a clear section in your protocol describing how informed consent will be obtained from all participants.',
+            'data_privacy': 'Include details about how patient data will be protected, stored, and who will have access.',
+            'safety_reporting': 'Specify the timeline and process for reporting adverse events to the Ethics Committee.',
+            'investigator': 'Add a section describing the investigator\'s qualifications and responsibilities.',
+            'ethics_committee': 'Include information about Ethics Committee approval process and timeline.'
+        };
+        
+        if (guidance[category]) {
+            action += ' ' + guidance[category];
+        }
+        
+        return action;
+    }
+    
+    function loadResults() {
+        $.ajax({
+            url: '/api/results/' + protocolId,
+            type: 'GET',
+            success: function(data) {
+                $('#loadingSection').addClass('d-none');
+                $('#resultsSection').removeClass('d-none');
+                
+                // Set date
+                $('#dateValue').text(new Date().toLocaleDateString('en-IN', {
+                    year: 'numeric', month: 'long', day: 'numeric'
+                }));
+                
+                // Update score - handle both 0 and actual scores
+                const score = data.compliance_score !== undefined ? data.compliance_score : 0;
+                $('#complianceScore').text(score);
+                
+                // Set score color
+                const scoreColor = score >= 80 ? '#10b981' : score >= 60 ? '#f59e0b' : score >= 40 ? '#ef4444' : '#dc2626';
+                $('.score-number').css('color', scoreColor);
+                
+                // Overall status
+                let statusText = '';
+                let statusClass = '';
+                if (score === 0) {
+                    statusText = '⚠ Your protocol has significant compliance gaps that need immediate attention. Please review all critical issues below.';
+                    statusClass = 'text-danger';
+                } else if (score >= 80) {
+                    statusText = '✓ Your protocol meets most regulatory requirements. Address the remaining issues for full compliance.';
+                    statusClass = 'text-success';
+                } else if (score >= 60) {
+                    statusText = '⚠ Your protocol needs improvements. Please address the identified issues before submission.';
+                    statusClass = 'text-warning';
+                } else {
+                    statusText = '✗ Your protocol has major compliance gaps. Significant revisions are required before submission.';
+                    statusClass = 'text-danger';
+                }
+                $('#overallStatus').html(`<strong class="${statusClass}">${statusText}</strong>`);
+                
+                // Update counts
+                $('#rulesChecked').text(data.total_rules_checked || 50);
+                $('#criticalCount').text(data.critical_violations);
+                $('#highCount').text(data.high_violations);
+                $('#otherCount').text(data.medium_violations + data.low_violations);
+                
+                // Compliance summary
+                renderComplianceSummary(data);
+                
+                // Render violations by severity
+                const critical = data.violations.filter(v => v.severity === 'critical');
+                const high = data.violations.filter(v => v.severity === 'high');
+                const other = data.violations.filter(v => v.severity === 'medium' || v.severity === 'low');
+                
+                if (critical.length > 0) {
+                    $('#criticalSection').removeClass('d-none');
+                    renderViolationList(critical, 'criticalList', 'critical');
+                }
+                
+                if (high.length > 0) {
+                    $('#highSection').removeClass('d-none');
+                    renderViolationList(high, 'highList', 'high');
+                }
+                
+                if (other.length > 0) {
+                    $('#otherSection').removeClass('d-none');
+                    renderViolationList(other, 'otherList', 'other');
+                }
+                
+                if (data.violations.length === 0) {
+                    $('#noIssuesSection').removeClass('d-none');
+                }
+            },
+            error: function(xhr) {
+                $('#loadingSection').addClass('d-none');
+                $('#errorSection').removeClass('d-none');
+            }
+        });
+    }
+    
+    function renderComplianceSummary(data) {
+        const categories = {};
+        data.violations.forEach(v => {
+            const cat = getCategoryName(v.category);
+            if (!categories[cat]) categories[cat] = 0;
+            categories[cat]++;
+        });
+        
+        let html = '<div class="row">';
+        
+        if (Object.keys(categories).length === 0) {
+            html += '<div class="col-12"><p class="text-success"><i class="fas fa-check-circle me-2"></i>All regulatory areas are compliant</p></div>';
+        } else {
+            html += '<div class="col-12"><p class="mb-3"><strong>Issues found in the following areas:</strong></p></div>';
+            for (const [cat, count] of Object.entries(categories)) {
+                html += `
+                    <div class="col-md-6 mb-2">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-exclamation-circle text-warning me-2"></i>
+                            <span>${cat}</span>
+                            <span class="badge bg-warning ms-auto">${count}</span>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+        
+        html += '</div>';
+        $('#complianceSummary').html(html);
+    }
+    
+    function renderViolationList(violations, containerId, severity) {
+        let html = '';
+        
+        violations.forEach((v, index) => {
+            const categoryName = getCategoryName(v.category);
+            const regulations = getRegulationName(v.rule_text + ' ' + v.violation_details);
+            const ruleText = simplifyText(v.rule_text);
+            const violationDetails = simplifyText(v.violation_details);
+            const recommendation = getActionableRecommendation(v.recommendation, v.category);
+            
+            const borderColor = severity === 'critical' ? 'danger' : severity === 'high' ? 'warning' : 'info';
+            const iconColor = severity === 'critical' ? 'danger' : severity === 'high' ? 'warning' : 'info';
+            
+            html += `
+                <div class="violation-card card border-start border-${borderColor} border-4">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div>
+                                <h6 class="mb-2">
+                                    <i class="fas fa-folder text-${iconColor} me-2"></i>${categoryName}
+                                </h6>
+                                ${regulations.map(r => `<span class="regulation-tag">${r}</span>`).join('')}
+                            </div>
+                            <span class="priority-badge bg-${borderColor} text-white">
+                                ${severity === 'critical' ? 'MUST FIX' : severity === 'high' ? 'HIGH PRIORITY' : 'RECOMMENDED'}
+                            </span>
+                        </div>
+                        
+                        <div class="mb-3 p-3" style="background: #f8f9fa; border-left: 3px solid #2563eb; border-radius: 5px;">
+                            <h6 class="text-primary mb-2">
+                                <i class="fas fa-book me-2"></i>Regulatory Requirement:
+                            </h6>
+                            <p class="mb-0">${ruleText}</p>
+                        </div>
+                        
+                        <div class="mb-3 p-3" style="background: #fef2f2; border-left: 3px solid #ef4444; border-radius: 5px;">
+                            <h6 class="text-danger mb-2">
+                                <i class="fas fa-times-circle me-2"></i>Gap Identified:
+                            </h6>
+                            <p class="mb-0">${violationDetails}</p>
+                        </div>
+                        
+                        <div class="action-box">
+                            <h6 class="text-success mb-2">
+                                <i class="fas fa-lightbulb me-2"></i>Action Required:
+                            </h6>
+                            <p class="mb-0"><strong>${recommendation}</strong></p>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        
+        $(`#${containerId}`).html(html);
+    }
+    
+    // Load results
+    loadResults();
+    
+    // Auto-refresh if not ready
+    const refreshInterval = setInterval(function() {
+        if ($('#errorSection').is(':visible')) {
+            loadResults();
+        } else {
+            clearInterval(refreshInterval);
+        }
+    }, 10000);
+});
+</script>
+{% endblock %}

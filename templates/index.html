@@ -1,0 +1,183 @@
+{% extends "base.html" %}
+
+{% block title %}ProtocolScout - AI-Powered Clinical Trial Compliance{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="hero-section">
+    <div class="container text-center">
+        <h1 class="display-4 fw-bold mb-4">
+            <i class="fas fa-shield-alt me-3"></i>ProtocolScout
+        </h1>
+        <p class="lead mb-4">
+            AI-Powered Clinical Trial Protocol Compliance Checker
+        </p>
+        <p class="mb-5">
+            Ensure your clinical trial protocols comply with Indian regulatory requirements<br>
+            ICMR, CDSCO, NDCT, ICH-GCP, and DPDP Act 2023
+        </p>
+        {% if current_user.is_authenticated %}
+        <a href="/upload" class="btn btn-light btn-lg px-5">
+            <i class="fas fa-upload me-2"></i>Upload Protocol Now
+        </a>
+        {% else %}
+        <a href="/register" class="btn btn-light btn-lg px-5 me-3">
+            <i class="fas fa-user-plus me-2"></i>Get Started Free
+        </a>
+        <a href="/login" class="btn btn-outline-light btn-lg px-5">
+            <i class="fas fa-sign-in-alt me-2"></i>Sign In
+        </a>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Features Section -->
+<div class="container mb-5">
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="card h-100 text-center p-4">
+                <div class="card-body">
+                    <div class="mb-3">
+                        <i class="fas fa-robot fa-3x text-primary"></i>
+                    </div>
+                    <h5 class="card-title">AI-Powered Analysis</h5>
+                    <p class="card-text">
+                        Uses Amazon Bedrock (Claude 3.5) to intelligently analyze your protocol against 50+ regulatory rules
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card h-100 text-center p-4">
+                <div class="card-body">
+                    <div class="mb-3">
+                        <i class="fas fa-file-medical fa-3x text-success"></i>
+                    </div>
+                    <h5 class="card-title">Medical Entity Extraction</h5>
+                    <p class="card-text">
+                        Automatically extracts drugs, conditions, procedures using Amazon Comprehend Medical
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card h-100 text-center p-4">
+                <div class="card-body">
+                    <div class="mb-3">
+                        <i class="fas fa-chart-pie fa-3x text-warning"></i>
+                    </div>
+                    <h5 class="card-title">Detailed Reports</h5>
+                    <p class="card-text">
+                        Get comprehensive compliance reports with scores, violations, and actionable recommendations
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- How It Works -->
+<div class="container mb-5">
+    <h2 class="text-center mb-5">How It Works</h2>
+    <div class="row g-4">
+        <div class="col-md-3 text-center">
+            <div class="mb-3">
+                <div class="rounded-circle bg-primary text-white d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                    <span class="fs-4 fw-bold">1</span>
+                </div>
+            </div>
+            <h5>Upload Protocol</h5>
+            <p class="text-muted">Upload your clinical trial protocol PDF</p>
+        </div>
+        
+        <div class="col-md-3 text-center">
+            <div class="mb-3">
+                <div class="rounded-circle bg-primary text-white d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                    <span class="fs-4 fw-bold">2</span>
+                </div>
+            </div>
+            <h5>AI Analysis</h5>
+            <p class="text-muted">Our AI extracts and analyzes content</p>
+        </div>
+        
+        <div class="col-md-3 text-center">
+            <div class="mb-3">
+                <div class="rounded-circle bg-primary text-white d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                    <span class="fs-4 fw-bold">3</span>
+                </div>
+            </div>
+            <h5>Compliance Check</h5>
+            <p class="text-muted">Check against 50+ regulatory rules</p>
+        </div>
+        
+        <div class="col-md-3 text-center">
+            <div class="mb-3">
+                <div class="rounded-circle bg-primary text-white d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                    <span class="fs-4 fw-bold">4</span>
+                </div>
+            </div>
+            <h5>Get Report</h5>
+            <p class="text-muted">Download detailed compliance report</p>
+        </div>
+    </div>
+</div>
+
+<!-- Regulatory Coverage -->
+<div class="container mb-5">
+    <div class="card">
+        <div class="card-body p-5">
+            <h3 class="text-center mb-4">Regulatory Coverage</h3>
+            <div class="row text-center">
+                <div class="col-md-2">
+                    <i class="fas fa-check-circle text-success fa-2x mb-2"></i>
+                    <p class="fw-bold">ICMR 2017</p>
+                </div>
+                <div class="col-md-2">
+                    <i class="fas fa-check-circle text-success fa-2x mb-2"></i>
+                    <p class="fw-bold">CDSCO</p>
+                </div>
+                <div class="col-md-2">
+                    <i class="fas fa-check-circle text-success fa-2x mb-2"></i>
+                    <p class="fw-bold">NDCT 2019</p>
+                </div>
+                <div class="col-md-2">
+                    <i class="fas fa-check-circle text-success fa-2x mb-2"></i>
+                    <p class="fw-bold">ICH-GCP E6(R2)</p>
+                </div>
+                <div class="col-md-2">
+                    <i class="fas fa-check-circle text-success fa-2x mb-2"></i>
+                    <p class="fw-bold">Schedule Y</p>
+                </div>
+                <div class="col-md-2">
+                    <i class="fas fa-check-circle text-success fa-2x mb-2"></i>
+                    <p class="fw-bold">DPDP Act 2023</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- CTA Section -->
+<div class="container text-center mb-5">
+    <div class="card bg-primary text-white">
+        <div class="card-body p-5">
+            <h3 class="mb-3">Ready to Check Your Protocol?</h3>
+            <p class="mb-4">Upload your clinical trial protocol and get a comprehensive compliance report in minutes</p>
+            {% if current_user.is_authenticated %}
+            <a href="/upload" class="btn btn-light btn-lg">
+                <i class="fas fa-upload me-2"></i>Upload Now
+            </a>
+            {% else %}
+            <a href="/register" class="btn btn-light btn-lg me-3">
+                <i class="fas fa-user-plus me-2"></i>Create Free Account
+            </a>
+            <a href="/login" class="btn btn-outline-light btn-lg">
+                <i class="fas fa-sign-in-alt me-2"></i>Sign In
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

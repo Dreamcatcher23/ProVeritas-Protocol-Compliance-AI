@@ -1,0 +1,200 @@
+{% extends "base.html" %}
+
+{% block title %}Upload Protocol - ProtocolScout{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-body p-5">
+                    <h2 class="text-center mb-4">
+                        <i class="fas fa-upload text-primary me-2"></i>Upload Clinical Trial Protocol
+                    </h2>
+                    
+                    <p class="text-center text-muted mb-4">
+                        Upload your protocol PDF to check compliance with Indian regulatory requirements
+                    </p>
+                    
+                    <form id="uploadForm" enctype="multipart/form-data">
+                        <!-- Protocol Information -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Logged in as</label>
+                            <div class="alert alert-info">
+                                <i class="fas fa-user me-2"></i>{{ current_user.name }} ({{ current_user.email }})
+                                <br>
+                                <i class="fas fa-building me-2"></i>{{ current_user.institution }}
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="protocol_title" class="form-label fw-bold">Protocol Title</label>
+                            <input type="text" class="form-control" id="protocol_title" name="protocol_title" 
+                                   placeholder="Brief title of your clinical trial" required>
+                        </div>
+                        
+                        <!-- File Upload -->
+                        <div class="mb-4">
+                            <label for="protocol_file" class="form-label fw-bold">Protocol Document (PDF)</label>
+                            <input type="file" class="form-control" id="protocol_file" name="protocol_file" 
+                                   accept=".pdf" required>
+                            <div class="form-text">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Maximum file size: 50MB. Only PDF files are accepted.
+                            </div>
+                        </div>
+                        
+                        <!-- File Preview -->
+                        <div id="filePreview" class="alert alert-info d-none mb-4">
+                            <i class="fas fa-file-pdf me-2"></i>
+                            <span id="fileName"></span>
+                            <span class="float-end" id="fileSize"></span>
+                        </div>
+                        
+                        <!-- Submit Button -->
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg" id="submitBtn">
+                                <i class="fas fa-cloud-upload-alt me-2"></i>Upload and Analyze
+                            </button>
+                        </div>
+                    </form>
+                    
+                    <!-- Progress Section -->
+                    <div id="progressSection" class="mt-4 d-none">
+                        <div class="text-center">
+                            <div class="spinner-border text-primary spinner-border-custom mb-3" role="status">
+                                <span class="visually-hidden">Processing...</span>
+                            </div>
+                            <h5 id="progressText">Uploading protocol...</h5>
+                            <p class="text-muted" id="progressSubtext">Please wait while we process your document</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Success Section -->
+                    <div id="successSection" class="mt-4 d-none">
+                        <div class="alert alert-success">
+                            <h5 class="alert-heading">
+                                <i class="fas fa-check-circle me-2"></i>Upload Successful!
+                            </h5>
+                            <p class="mb-3">Your protocol has been uploaded and is being analyzed.</p>
+                            <p class="mb-0">
+                                <strong>Protocol ID:</strong> <code id="protocolId"></code>
+                            </p>
+                            <p class="mb-3">
+                                <strong>Estimated completion:</strong> <span id="estimatedTime"></span>
+                            </p>
+                            <div class="d-grid gap-2">
+                                <a href="#" id="viewStatusBtn" class="btn btn-primary">
+                                    <i class="fas fa-eye me-2"></i>View Status
+                                </a>
+                                <a href="/upload" class="btn btn-outline-secondary">
+                                    <i class="fas fa-plus me-2"></i>Upload Another Protocol
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Error Section -->
+                    <div id="errorSection" class="mt-4 d-none">
+                        <div class="alert alert-danger">
+                            <h5 class="alert-heading">
+                                <i class="fas fa-exclamation-triangle me-2"></i>Upload Failed
+                            </h5>
+                            <p id="errorMessage"></p>
+                            <button class="btn btn-danger" onclick="location.reload()">
+                                <i class="fas fa-redo me-2"></i>Try Again
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Info Cards -->
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <h6 class="card-title">
+                                <i class="fas fa-clock text-primary me-2"></i>Processing Time
+                            </h6>
+                            <p class="card-text small text-muted">
+                                Typical processing time is 3-5 minutes depending on document size
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <h6 class="card-title">
+                                <i class="fas fa-lock text-success me-2"></i>Data Security
+                            </h6>
+                            <p class="card-text small text-muted">
+                                All documents are encrypted and stored securely in AWS S3
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // File input change handler
+    $('#protocol_file').on('change', function() {
+        const file = this.files[0];
+        if (file) {
+            $('#fileName').text(file.name);
+            $('#fileSize').text((file.size / (1024 * 1024)).toFixed(2) + ' MB');
+            $('#filePreview').removeClass('d-none');
+        }
+    });
+    
+    // Form submission
+    $('#uploadForm').on('submit', function(e) {
+        e.preventDefault();
+        
+        // Hide all sections
+        $('#progressSection').addClass('d-none');
+        $('#successSection').addClass('d-none');
+        $('#errorSection').addClass('d-none');
+        
+        // Show progress
+        $('#progressSection').removeClass('d-none');
+        $('#submitBtn').prop('disabled', true);
+        
+        // Prepare form data
+        const formData = new FormData(this);
+        
+        // Upload
+        $.ajax({
+            url: '/upload',
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(response) {
+                $('#progressSection').addClass('d-none');
+                $('#successSection').removeClass('d-none');
+                
+                $('#protocolId').text(response.protocol_id);
+                $('#estimatedTime').text(response.estimated_completion);
+                $('#viewStatusBtn').attr('href', '/results/' + response.protocol_id);
+            },
+            error: function(xhr) {
+                $('#progressSection').addClass('d-none');
+                $('#errorSection').removeClass('d-none');
+                
+                const error = xhr.responseJSON ? xhr.responseJSON.error : 'Unknown error occurred';
+                $('#errorMessage').text(error);
+                $('#submitBtn').prop('disabled', false);
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

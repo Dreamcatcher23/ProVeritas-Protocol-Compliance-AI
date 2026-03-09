@@ -1,0 +1,203 @@
+{% extends "base.html" %}
+
+{% block title %}About - ProtocolScout{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <!-- Header -->
+            <div class="text-center mb-5">
+                <h1 class="display-4 fw-bold mb-3">
+                    <i class="fas fa-shield-alt text-primary me-3"></i>About ProtocolScout
+                </h1>
+                <p class="lead text-muted">
+                    AI-Powered Clinical Trial Protocol Compliance Checker for Indian Regulations
+                </p>
+            </div>
+            
+            <!-- What is ProtocolScout -->
+            <div class="card mb-4">
+                <div class="card-body p-5">
+                    <h3 class="mb-4">What is ProtocolScout?</h3>
+                    <p class="lead">
+                        ProtocolScout is an intelligent compliance checking system that helps clinical trial researchers 
+                        ensure their protocols meet Indian regulatory requirements.
+                    </p>
+                    <p>
+                        Using advanced AI technologies from Amazon Web Services (AWS), ProtocolScout automatically 
+                        analyzes clinical trial protocols and identifies potential compliance gaps against regulations 
+                        from ICMR, CDSCO, NDCT, ICH-GCP, and the DPDP Act 2023.
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Technology Stack -->
+            <div class="card mb-4">
+                <div class="card-body p-5">
+                    <h3 class="mb-4">
+                        <i class="fas fa-cogs text-primary me-2"></i>Technology Stack
+                    </h3>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <h5><i class="fas fa-robot text-primary me-2"></i>Amazon Bedrock (Claude 3.5)</h5>
+                            <p class="text-muted">
+                                Advanced AI reasoning engine for intelligent compliance analysis and rule extraction
+                            </p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <h5><i class="fas fa-file-alt text-success me-2"></i>Amazon Textract</h5>
+                            <p class="text-muted">
+                                OCR technology to extract text, tables, and forms from PDF protocols
+                            </p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <h5><i class="fas fa-heartbeat text-danger me-2"></i>Amazon Comprehend Medical</h5>
+                            <p class="text-muted">
+                                Medical entity extraction for drugs, conditions, procedures, and dosages
+                            </p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <h5><i class="fas fa-database text-warning me-2"></i>Amazon DynamoDB</h5>
+                            <p class="text-muted">
+                                Fast, scalable database for storing compliance rules and results
+                            </p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <h5><i class="fas fa-cloud text-info me-2"></i>AWS Lambda</h5>
+                            <p class="text-muted">
+                                Serverless compute for processing protocols without managing servers
+                            </p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <h5><i class="fas fa-folder text-secondary me-2"></i>Amazon S3</h5>
+                            <p class="text-muted">
+                                Secure, encrypted storage for protocols and compliance reports
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- How It Works -->
+            <div class="card mb-4">
+                <div class="card-body p-5">
+                    <h3 class="mb-4">
+                        <i class="fas fa-project-diagram text-primary me-2"></i>How It Works
+                    </h3>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5 class="mb-3">Phase A: Regulatory Database</h5>
+                            <ol class="list-group list-group-numbered">
+                                <li class="list-group-item">Scrape regulatory sources (ICMR, CDSCO, etc.)</li>
+                                <li class="list-group-item">Extract text from PDFs using Textract</li>
+                                <li class="list-group-item">Parse regulations using Bedrock AI</li>
+                                <li class="list-group-item">Store 50+ rules in DynamoDB</li>
+                            </ol>
+                        </div>
+                        <div class="col-md-6">
+                            <h5 class="mb-3">Phase B: Protocol Analysis</h5>
+                            <ol class="list-group list-group-numbered">
+                                <li class="list-group-item">User uploads protocol PDF</li>
+                                <li class="list-group-item">Textract extracts text and tables</li>
+                                <li class="list-group-item">Comprehend Medical extracts entities</li>
+                                <li class="list-group-item">Bedrock checks compliance</li>
+                                <li class="list-group-item">Generate detailed report</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Regulatory Coverage -->
+            <div class="card mb-4">
+                <div class="card-body p-5">
+                    <h3 class="mb-4">
+                        <i class="fas fa-balance-scale text-primary me-2"></i>Regulatory Coverage
+                    </h3>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <h5>ICMR Guidelines 2017</h5>
+                            <p class="text-muted">
+                                National Ethical Guidelines for Biomedical and Health Research involving Human Participants
+                            </p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <h5>CDSCO Regulations</h5>
+                            <p class="text-muted">
+                                Central Drugs Standard Control Organization requirements for clinical trials
+                            </p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <h5>NDCT Rules 2019</h5>
+                            <p class="text-muted">
+                                New Drugs and Clinical Trials Rules, 2019
+                            </p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <h5>ICH-GCP E6(R2)</h5>
+                            <p class="text-muted">
+                                International Council for Harmonisation Good Clinical Practice Guidelines
+                            </p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <h5>Schedule Y</h5>
+                            <p class="text-muted">
+                                Requirements and guidelines for clinical trials in India
+                            </p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <h5>DPDP Act 2023</h5>
+                            <p class="text-muted">
+                                Digital Personal Data Protection Act for data privacy compliance
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Features -->
+            <div class="card mb-4">
+                <div class="card-body p-5">
+                    <h3 class="mb-4">
+                        <i class="fas fa-star text-primary me-2"></i>Key Features
+                    </h3>
+                    <ul class="list-unstyled">
+                        <li class="mb-3">
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            <strong>Automated Compliance Checking:</strong> Check against 50+ regulatory rules automatically
+                        </li>
+                        <li class="mb-3">
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            <strong>Medical Entity Extraction:</strong> Identify drugs, conditions, procedures, and dosages
+                        </li>
+                        <li class="mb-3">
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            <strong>Severity Classification:</strong> Violations categorized as Critical, High, Medium, or Low
+                        </li>
+                        <li class="mb-3">
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            <strong>Actionable Recommendations:</strong> Get specific guidance on fixing violations
+                        </li>
+                        <li class="mb-3">
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            <strong>Multiple Report Formats:</strong> Download reports in PDF, DOCX, or JSON
+                        </li>
+                        <li class="mb-3">
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            <strong>Secure & Encrypted:</strong> All data encrypted at rest and in transit
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- CTA -->
+            <div class="text-center">
+                <a href="/upload" class="btn btn-primary btn-lg px-5">
+                    <i class="fas fa-upload me-2"></i>Try ProtocolScout Now
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
